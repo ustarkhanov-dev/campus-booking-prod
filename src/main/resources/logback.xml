@@ -1,0 +1,19 @@
+<configuration>
+    <!-- Консольный аппендер с поддержкой цветов (%black, %red, %green, %yellow, %blue, %magenta, %cyan, %white) -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <withJansi>true</withJansi>
+        <encoder>
+            <!-- Шаблон: Время | Поток | Цветной Уровень | Класс | Сообщение -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %highlight(%-5level) %cyan(%logger{36}) - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Главная настройка: выводим ВСЁ от уровня INFO и выше ТОЛЬКО в консоль -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+
+    <!-- Тонкая настройка для вашего пакета: если захотите видеть DEBUG-логи вашего кода -->
+    <!-- Замените 'com.example' на корневой пакет вашего проекта campus_BGPU -->
+    <!-- <logger name="com.example" level="DEBUG" /> -->
+</configuration>

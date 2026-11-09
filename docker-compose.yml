@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # Сервис базы данных PostgreSQL
+  campus-db:
+    image: postgres:16-alpine
+    container_name: campus-postgres-db
+    restart: always
+    environment:
+      POSTGRES_DB: campus_booking
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5143:5432"
+    volumes:
+      - campus_db_data:/var/lib/postgresql/data
+    networks:
+      - campus-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d campus_booking"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Сервис нашего приложения на Kotlin / Spring Boot
+  campus-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: campus-spring-app
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      # Переопределяем хост базы данных на имя сервиса внутри сети Docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://campus-db:5432/campus_booking
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+
+      # Секретный ключ и интеграционные URL (подставь актуальные значения при деплое)
+      BGPU_ACCESS_SECRET_KEY: ${BGPU_ACCESS_SECRET_KEY}
+      BGPU_USER_API_URL: ${BGPU_USER_API_URL}
+      BGPU_POINTS_API_URL: ${BGPU_POINTS_API_URL}
+    depends_on:
+      campus-db:
+        condition: service_healthy # Приложение начнет собираться и запускаться только после полной готовности БД
+    networks:
+      - campus-network
+
+volumes:
+  campus_db_data:
+
+networks:
+  campus-network:
+    driver: bridge
